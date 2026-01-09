@@ -1,0 +1,60 @@
+[tool.ruff]
+# Python version
+target-version = "py312"
+
+# Line length
+line-length = 100
+
+# Exclude directories
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "env",
+    "node_modules",
+    "dist",
+    "build",
+    ".eggs",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# Enable linting and formatting
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "RUF",    # ruff-specific rules
+]
+
+# Ignore rules
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "E402",   # module level import not at top of file (needed for late imports)
+    "B904",   # raise from inside except (we handle this explicitly)
+    "RUF012", # mutable class attributes (intentional for patterns)
+    "RUF013", # implicit optional (we use None defaults intentionally)
+]
+
+[tool.ruff.lint.isort]
+# Import sorting
+known-first-party = ["backend"]
+force-single-line = false
+lines-after-imports = 2
+
+[tool.ruff.format]
+# Use double quotes
+quote-style = "double"
+
+# Indent with 4 spaces
+indent-style = "space"
+
+# Line endings
+line-ending = "auto"

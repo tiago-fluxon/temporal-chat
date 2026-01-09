@@ -1,0 +1,105 @@
+services:
+  # Temporal server with auto-setup
+  temporal:
+    image: temporalio/auto-setup:latest
+    ports:
+      - "7233:7233" # gRPC endpoint for workers/clients
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_SEEDS=postgresql
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "tctl", "--address", "temporal:7233", "workflow", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Temporal Web UI
+  temporal-ui:
+    image: temporalio/ui:latest
+    ports:
+      - "8233:8080"
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    depends_on:
+      temporal:
+        condition: service_healthy
+
+  # PostgreSQL database for Temporal
+  postgresql:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_USER: temporal
+      POSTGRES_DB: temporal
+    volumes:
+      - temporal-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Temporal worker (processes workflows/activities with native streaming)
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: worker
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_NAMESPACE=default
+      - TASK_QUEUE=chat-queue
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Read-only mount - configurable via DOCUMENTS_DIR env variable
+      - ${DOCUMENTS_DIR:-~/Desktop}:/documents:ro
+      # Writable output directory
+      - ./.out:/app/.out
+    restart: unless-stopped
+
+  # FastAPI backend (REST + SSE endpoints)
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: api
+    ports:
+      - "8000:8000"
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_NAMESPACE=default
+      - PORT=8000
+      - CORS_ORIGINS=*
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  # React frontend (served via nginx)
+  frontend:
+    build:
+      context: frontend
+      dockerfile: ../docker/Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  temporal-db:
+    driver: local

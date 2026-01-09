@@ -1,0 +1,75 @@
+# Multi-stage Dockerfile for Python backend
+# Supports both API server and Temporal worker targets
+
+# ============================================
+# Base Stage: Python environment with dependencies
+# ============================================
+FROM python:3.11-slim AS base
+
+# Install system dependencies for PDF processing and image handling
+RUN apt-get update && apt-get install -y \
+    libmagic1 \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements first (layer caching optimization)
+COPY requirements.txt .
+
+# Install Python dependencies to user site-packages
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# ============================================
+# API Target: FastAPI server
+# ============================================
+FROM python:3.11-slim AS api
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y \
+    libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy installed packages from base
+COPY --from=base /root/.local /root/.local
+
+# Copy application code
+COPY backend/ /app/backend/
+
+# Add .local/bin to PATH for installed executables
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONPATH=/app
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Run FastAPI with uvicorn
+CMD ["uvicorn", "backend.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# ============================================
+# Worker Target: Temporal worker process
+# ============================================
+FROM python:3.11-slim AS worker
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy installed packages from base
+COPY --from=base /root/.local /root/.local
+
+# Copy application code
+COPY backend/ /app/backend/
+
+# Add .local/bin to PATH
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONPATH=/app
+
+# Run Temporal worker (Native Temporal Streaming, No Redis)
+CMD ["python", "-m", "backend.temporal.workers.stream_worker"]
