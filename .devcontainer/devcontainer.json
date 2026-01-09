@@ -1,0 +1,184 @@
+{
+  "name": "Worker Stream - Full Stack",
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "../docker-compose.dev.yml"
+  ],
+  "service": "api",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+
+  // Features to add to the dev container
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+
+  // VSCode settings for full-stack development
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // Python settings
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.linting.flake8Enabled": false,
+        "python.formatting.provider": "none",
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "ruff.enable": true,
+        "ruff.organizeImports": true,
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestArgs": [
+          "backend/tests"
+        ],
+
+        // TypeScript settings
+        "typescript.tsdk": "frontend/node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+
+        // ESLint
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "eslint.workingDirectories": [
+          "./frontend"
+        ],
+
+        // Files
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true,
+          ".pytest_cache": true,
+          ".ruff_cache": true,
+          "**/.mypy_cache": true,
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/.vite": true
+        },
+        "files.watcherExclude": {
+          "**/__pycache__/**": true,
+          "**/node_modules/**": true,
+          "**/dist/**": true,
+          "**/.vite/**": true,
+          "**/.git/objects/**": true,
+          "**/.git/subtree-cache/**": true,
+          "**/env/**": true
+        }
+      },
+      "extensions": [
+        // Python development
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.debugpy",
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
+
+        // TypeScript/JavaScript
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+
+        // React
+        "dsznajder.es7-react-js-snippets",
+
+        // Testing
+        "littlefoxteam.vscode-python-test-adapter",
+        "orta.vscode-jest",
+
+        // Docker
+        "ms-azuretools.vscode-docker",
+
+        // YAML/JSON
+        "redhat.vscode-yaml",
+
+        // Git
+        "eamodio.gitlens",
+
+        // Utilities
+        "aaron-bond.better-comments",
+        "usernamehw.errorlens",
+        "christian-kohler.path-intellisense",
+        "christian-kohler.npm-intellisense",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  },
+
+  // Forward ports for accessing all services
+  "forwardPorts": [
+    8000,  // FastAPI
+    5173,  // Vite dev server
+    3001,  // Vite HMR
+    5679,  // Debugpy (API)
+    5678,  // Debugpy (Worker)
+    8233,  // Temporal UI
+    7233   // Temporal gRPC
+  ],
+
+  // Port attributes
+  "portsAttributes": {
+    "8000": {
+      "label": "FastAPI Backend",
+      "onAutoForward": "notify"
+    },
+    "5173": {
+      "label": "Vite Frontend",
+      "onAutoForward": "openBrowser"
+    },
+    "3001": {
+      "label": "Vite HMR",
+      "onAutoForward": "silent"
+    },
+    "5679": {
+      "label": "Python Debugger (API)",
+      "onAutoForward": "silent"
+    },
+    "5678": {
+      "label": "Python Debugger (Worker)",
+      "onAutoForward": "silent"
+    },
+    "8233": {
+      "label": "Temporal UI",
+      "onAutoForward": "silent"
+    }
+  },
+
+  // Post-create commands
+  "postCreateCommand": "pip install --user debugpy && cd frontend && yarn install",
+
+  // User to run commands as
+  "remoteUser": "root",
+
+  // Environment variables
+  "remoteEnv": {
+    "PYTHONUNBUFFERED": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  }
+}

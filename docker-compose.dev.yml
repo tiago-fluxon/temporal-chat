@@ -1,0 +1,89 @@
+# Development overrides for docker-compose.yml
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# This file adds:
+# - Volume mounts for live code reloading
+# - Dev server configurations (uvicorn --reload, vite dev)
+# - Debugging ports
+# - Development-optimized settings
+
+services:
+  # Temporal worker with live reload and debugging
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: worker
+    volumes:
+      # Mount source code for live reloading
+      - ./backend:/app/backend:delegated
+      # Keep documents and output mounts from base compose
+      - ${DOCUMENTS_DIR:-~/Desktop}:/documents:ro
+      - ./.out:/app/.out
+    environment:
+      # Add development environment variables
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_NAMESPACE=default
+      - TASK_QUEUE=chat-queue
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=DEBUG
+      - PYTHONDONTWRITEBYTECODE=1
+    # Override command to enable Python development mode
+    command: python -m backend.temporal.workers.stream_worker
+    ports:
+      # Expose debugpy port for remote debugging
+      - "5678:5678"
+
+  # FastAPI backend with hot reload
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: api
+    volumes:
+      # Mount source code for live reloading
+      - ./backend:/app/backend:delegated
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_NAMESPACE=default
+      - PORT=8000
+      - CORS_ORIGINS=*
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=DEBUG
+      - PYTHONDONTWRITEBYTECODE=1
+    # Override command to enable uvicorn auto-reload
+    command: uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/backend
+    ports:
+      - "8000:8000"
+      # Expose debugpy port for remote debugging
+      - "5679:5679"
+
+  # React frontend with Vite dev server (HMR)
+  frontend:
+    build:
+      context: frontend
+      dockerfile: ../docker/Dockerfile.frontend
+      target: builder  # Use builder stage, not production nginx
+    volumes:
+      # Mount source code for hot module replacement
+      - ./frontend:/app:delegated
+      # Use named volume for node_modules (performance optimization)
+      - frontend-node-modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+    # Override command to run Vite dev server
+    command: sh -c "yarn install && yarn dev --host 0.0.0.0"
+    ports:
+      - "3000:5173"  # Vite dev server default port
+      - "3001:3001"  # Vite HMR WebSocket port
+    # Stdin/tty for interactive dev server
+    stdin_open: true
+    tty: true
+
+volumes:
+  # Named volume for frontend node_modules (performance)
+  frontend-node-modules:
+    driver: local

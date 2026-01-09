@@ -1,0 +1,122 @@
+{
+  "name": "Worker Stream - Backend (Python)",
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "../docker-compose.dev.yml"
+  ],
+  "service": "api",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+
+  // Features to add to the dev container
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // VSCode settings for Python development
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.linting.flake8Enabled": false,
+        "python.formatting.provider": "none",
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "ruff.enable": true,
+        "ruff.organizeImports": true,
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestArgs": [
+          "backend/tests"
+        ],
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true,
+          ".pytest_cache": true,
+          ".ruff_cache": true,
+          "**/.mypy_cache": true
+        },
+        "files.watcherExclude": {
+          "**/__pycache__/**": true,
+          "**/node_modules/**": true,
+          "**/.git/objects/**": true,
+          "**/.git/subtree-cache/**": true,
+          "**/env/**": true
+        }
+      },
+      "extensions": [
+        // Python development
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.debugpy",
+        "charliermarsh.ruff",
+
+        // Code quality
+        "ms-python.mypy-type-checker",
+
+        // Testing
+        "littlefoxteam.vscode-python-test-adapter",
+
+        // Docker
+        "ms-azuretools.vscode-docker",
+
+        // YAML/JSON
+        "redhat.vscode-yaml",
+        "esbenp.prettier-vscode",
+
+        // Git
+        "eamodio.gitlens",
+
+        // Utilities
+        "aaron-bond.better-comments",
+        "usernamehw.errorlens",
+        "christian-kohler.path-intellisense"
+      ]
+    }
+  },
+
+  // Forward ports for accessing services
+  "forwardPorts": [
+    8000,  // FastAPI
+    5679,  // Debugpy (API)
+    8233,  // Temporal UI
+    7233   // Temporal gRPC
+  ],
+
+  // Port attributes
+  "portsAttributes": {
+    "8000": {
+      "label": "FastAPI",
+      "onAutoForward": "notify"
+    },
+    "5679": {
+      "label": "Python Debugger (API)",
+      "onAutoForward": "silent"
+    },
+    "8233": {
+      "label": "Temporal UI",
+      "onAutoForward": "silent"
+    }
+  },
+
+  // Post-create commands
+  "postCreateCommand": "pip install --user debugpy",
+
+  // User to run commands as (same as Dockerfile)
+  "remoteUser": "root",
+
+  // Environment variables
+  "remoteEnv": {
+    "PYTHONUNBUFFERED": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  }
+}

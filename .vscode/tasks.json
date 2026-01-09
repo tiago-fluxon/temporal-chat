@@ -1,0 +1,222 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Docker: Start Dev Environment",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "docker"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Docker: Start Dev Environment (Detached)",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "docker"
+      }
+    },
+    {
+      "label": "Docker: Stop Dev Environment",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml -f docker-compose.dev.yml down",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "docker"
+      }
+    },
+    {
+      "label": "Docker: Restart Dev Environment",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.yml -f docker-compose.dev.yml restart",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "docker"
+      }
+    },
+    {
+      "label": "Docker: View Logs (All Services)",
+      "type": "shell",
+      "command": "docker compose logs -f",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "docker-logs"
+      }
+    },
+    {
+      "label": "Docker: View Logs (Worker)",
+      "type": "shell",
+      "command": "docker compose logs -f worker",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "docker-logs"
+      }
+    },
+    {
+      "label": "Docker: View Logs (API)",
+      "type": "shell",
+      "command": "docker compose logs -f api",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "docker-logs"
+      }
+    },
+    {
+      "label": "Docker: View Logs (Frontend)",
+      "type": "shell",
+      "command": "docker compose logs -f frontend",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "docker-logs"
+      }
+    },
+    {
+      "label": "Python: Run Tests",
+      "type": "shell",
+      "command": "pytest backend/tests -v",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "testing"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Python: Run Tests with Coverage",
+      "type": "shell",
+      "command": "pytest backend/tests -v --cov=backend --cov-report=html",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "testing"
+      }
+    },
+    {
+      "label": "Python: Format Code (Black)",
+      "type": "shell",
+      "command": "black backend/",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "group": "code-quality"
+      }
+    },
+    {
+      "label": "Python: Lint Code (Ruff)",
+      "type": "shell",
+      "command": "ruff check backend/",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "code-quality"
+      }
+    },
+    {
+      "label": "Python: Type Check (MyPy)",
+      "type": "shell",
+      "command": "mypy backend/",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "code-quality"
+      }
+    },
+    {
+      "label": "Frontend: Install Dependencies",
+      "type": "shell",
+      "command": "cd frontend && yarn install",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "frontend"
+      }
+    },
+    {
+      "label": "Frontend: Run Dev Server",
+      "type": "shell",
+      "command": "cd frontend && yarn dev",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "frontend"
+      }
+    },
+    {
+      "label": "Frontend: Build Production",
+      "type": "shell",
+      "command": "cd frontend && yarn build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "frontend"
+      }
+    },
+    {
+      "label": "Frontend: Lint",
+      "type": "shell",
+      "command": "cd frontend && yarn lint",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "frontend"
+      }
+    },
+    {
+      "label": "Frontend: Format",
+      "type": "shell",
+      "command": "cd frontend && yarn format",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "group": "frontend"
+      }
+    },
+    {
+      "label": "Frontend: Type Check",
+      "type": "shell",
+      "command": "cd frontend && yarn type-check",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "frontend"
+      }
+    }
+  ]
+}

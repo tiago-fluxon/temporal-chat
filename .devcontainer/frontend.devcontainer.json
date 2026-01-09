@@ -1,0 +1,133 @@
+{
+  "name": "Worker Stream - Frontend (React/TypeScript)",
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "../docker-compose.dev.yml"
+  ],
+  "service": "frontend",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+
+  // Features to add to the dev container
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // VSCode settings for TypeScript/React development
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.organizeImports": "explicit"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/.vite": true
+        },
+        "files.watcherExclude": {
+          "**/node_modules/**": true,
+          "**/dist/**": true,
+          "**/.vite/**": true,
+          "**/.git/objects/**": true,
+          "**/.git/subtree-cache/**": true
+        }
+      },
+      "extensions": [
+        // TypeScript/JavaScript
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+
+        // React
+        "dsznajder.es7-react-js-snippets",
+
+        // Testing
+        "orta.vscode-jest",
+
+        // CSS/Styling
+        "bradlc.vscode-tailwindcss",
+
+        // Docker
+        "ms-azuretools.vscode-docker",
+
+        // YAML/JSON
+        "redhat.vscode-yaml",
+
+        // Git
+        "eamodio.gitlens",
+
+        // Utilities
+        "aaron-bond.better-comments",
+        "usernamehw.errorlens",
+        "christian-kohler.path-intellisense",
+        "christian-kohler.npm-intellisense",
+
+        // Code quality
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  },
+
+  // Forward ports for accessing services
+  "forwardPorts": [
+    5173,  // Vite dev server
+    3001,  // Vite HMR
+    8000,  // Backend API
+    8233   // Temporal UI
+  ],
+
+  // Port attributes
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "openBrowser"
+    },
+    "3001": {
+      "label": "Vite HMR",
+      "onAutoForward": "silent"
+    },
+    "8000": {
+      "label": "Backend API",
+      "onAutoForward": "silent"
+    },
+    "8233": {
+      "label": "Temporal UI",
+      "onAutoForward": "silent"
+    }
+  },
+
+  // Post-create commands
+  "postCreateCommand": "yarn install",
+
+  // User to run commands as
+  "remoteUser": "node",
+
+  // Environment variables
+  "remoteEnv": {
+    "NODE_ENV": "development"
+  }
+}
